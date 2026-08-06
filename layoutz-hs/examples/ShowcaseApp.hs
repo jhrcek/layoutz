@@ -16,7 +16,6 @@ module Main where
 import Layoutz
 import Text.Printf (printf)
 import Data.Char (isAlphaNum)
-import qualified Data.Text as T
 
 -- State
 
@@ -234,14 +233,14 @@ renderHeader s =
   in layout
        [ br
        , tightRow
-           [ withColor ColorBrightBlack $ text (T.pack prefix)
-           , withStyle StyleBold $ withColor ColorBrightCyan $ text (T.pack title)
-           , withColor ColorBrightBlack $ text (T.pack (" " ++ dashes ++ " "))
-           , withColor ColorBrightBlack $ text (T.pack suffix)
+           [ withColor ColorBrightBlack $ text prefix
+           , withStyle StyleBold $ withColor ColorBrightCyan $ text title
+           , withColor ColorBrightBlack $ text (" " ++ dashes ++ " ")
+           , withColor ColorBrightBlack $ text suffix
            ]
        , br
-       , withStyle StyleBold $ withColor ColorBrightYellow $ text (T.pack (" " ++ sceneNames !! scene s))
-       , text (T.pack (" " ++ sceneDots))
+       , withStyle StyleBold $ withColor ColorBrightYellow $ text (" " ++ sceneNames !! scene s)
+       , text (" " ++ sceneDots)
        ]
 
 renderFooter :: ShowcaseState -> L
@@ -282,9 +281,9 @@ scenePhysicsGame s =
         ]
     , withColor ColorBrightMagenta $ withBorder BorderRound $ box "Physics"
         [ alignLeft 28 $ render $ layout
-            [ kv [ ("gravity", T.pack gLabel), ("velocity", T.pack velLabel), ("height", T.pack yLabel) ]
+            [ kv [ ("gravity", gLabel), ("velocity", velLabel), ("height", yLabel) ]
             , br
-            , withColor ColorBrightGreen $ text (T.pack energyBar)
+            , withColor ColorBrightGreen $ text energyBar
             , br
             , withColor ColorBrightCyan $ spinner "Simulating" (tick s `div` 3) SpinnerDots
             , withStyle StyleBold $ withColor ColorBrightYellow $ text "Press Space to kick ball!"
@@ -300,9 +299,9 @@ sceneRayMarcher s =
       twoPi = 2 * pi :: Double
       thetaWrapped = rayTheta s - twoPi * fromIntegral (floor (rayTheta s / twoPi) :: Int)
       cameraStats = withColor ColorBrightBlue $ kv
-        [ ("th",   T.pack (printf "%.2f" thetaWrapped :: String))
-        , ("ph",   T.pack (printf "%.2f" (rayPhi s) :: String))
-        , ("zoom", T.pack (printf "%.1f" (rayDist s) :: String))
+        [ ("th",   printf "%.2f" thetaWrapped :: String)
+        , ("ph",   printf "%.2f" (rayPhi s) :: String)
+        , ("zoom", printf "%.1f" (rayDist s) :: String)
         ]
       controls = withStyle StyleDim $ layout
         [ withColor ColorBrightYellow $ text "wasd   orbit"
@@ -318,7 +317,7 @@ sceneRayMarcher s =
         , controls
         ]
       cameraBox = withColor ColorBrightMagenta $ withBorder BorderRound $ box "Camera" [camera]
-  in row [text (T.pack fb), cameraBox]
+  in row [text fb, cameraBox]
 
 -- Scene 3: Text Input & Lists
 
@@ -327,12 +326,12 @@ sceneTextInput s =
   let inputLine =
         if addingItem s then
           row [ withColor ColorBrightYellow $ spinner "Adding" (addTick s) SpinnerDots
-              , withColor ColorBrightYellow $ text (T.pack ("  \"" ++ textValue s ++ "\""))
+              , withColor ColorBrightYellow $ text ("  \"" ++ textValue s ++ "\"")
               ]
         else
           let display = if null (textValue s)
                         then withColor ColorBrightBlack $ text "Type something..."
-                        else withColor ColorBrightWhite $ text (T.pack (textValue s))
+                        else withColor ColorBrightWhite $ text (textValue s)
           in tightRow [ withColor ColorBrightCyan $ text "> ", display, withStyle StyleBlink $ text "_" ]
 
       itemColors = [ColorBrightGreen, ColorBrightBlue, ColorBrightMagenta, ColorBrightYellow, ColorBrightCyan]
@@ -342,8 +341,8 @@ sceneTextInput s =
         else
           layout $ zipWith (\i item ->
             tightRow
-              [ withColor ColorBrightBlack $ text (T.pack ("  " ++ show (i + 1) ++ ". "))
-              , withColor (itemColors !! (i `mod` length itemColors)) $ text (T.pack item)
+              [ withColor ColorBrightBlack $ text ("  " ++ show (i + 1) ++ ". ")
+              , withColor (itemColors !! (i `mod` length itemColors)) $ text item
               ]
             ) [0 :: Int ..] (stItems s)
 
@@ -363,15 +362,15 @@ sceneTextInput s =
         ]
     , withBorder BorderRound $ box "Stats"
         [ alignLeft boxW $ render $ layout
-            [ tightRow [ text "Total items: ", withStyle StyleBold $ withColor ColorBrightCyan $ text (T.pack (show cnt)) ]
-            , tightRow [ text "Longest:     ", withColor ColorBrightMagenta $ text (T.pack longest) ]
-            , tightRow [ text "Shortest:    ", withColor ColorBrightMagenta $ text (T.pack shortest) ]
+            [ tightRow [ text "Total items: ", withStyle StyleBold $ withColor ColorBrightCyan $ text (show cnt) ]
+            , tightRow [ text "Longest:     ", withColor ColorBrightMagenta $ text longest ]
+            , tightRow [ text "Shortest:    ", withColor ColorBrightMagenta $ text shortest ]
             ]
         , br
         , alignLeft boxW $ render $
             if cnt >= 3
             then withStyle StyleBold $ withColor ColorBrightGreen $ text "Nice collection!"
-            else withColor ColorBrightBlack $ text (T.pack ("Add " ++ show (3 - cnt) ++ " more..."))
+            else withColor ColorBrightBlack $ text ("Add " ++ show (3 - cnt) ++ " more...")
         ]
     ]
 
@@ -420,17 +419,17 @@ sceneTables s =
               | isActive          = withStyle (StyleBold <> StyleReverse) . withColor ColorBrightCyan
               | isSel             = withColor ColorBrightGreen
               | otherwise         = id
-        in map (applyStyle . text . T.pack) cells
+        in map (applyStyle . text) cells
         ) [0 :: Int ..] services
 
       selCount = length (tableSelected s)
       selInfo  = if selCount > 0
-                 then withColor ColorBrightGreen $ text (T.pack (show selCount ++ " selected"))
+                 then withColor ColorBrightGreen $ text (show selCount ++ " selected")
                  else withColor ColorBrightBlack $ text "none selected"
   in layout
     [ withBorder BorderRound $ table ["Service", "Status", "Latency", "Uptime"] coloredRows
     , tightRow
-        [ withColor ColorBrightBlack $ text (T.pack (" Row " ++ show (tableRow s + 1) ++ "/" ++ show (length services) ++ "  |  "))
+        [ withColor ColorBrightBlack $ text (" Row " ++ show (tableRow s + 1) ++ "/" ++ show (length services) ++ "  |  ")
         , selInfo
         ]
     ]
@@ -448,7 +447,7 @@ sceneChartsPlots s =
       lineLabel  = printf "0.5x %s %.1f" sign (abs intercept') :: String
   in row
     [ layout
-        [ withColor ColorBrightYellow $ text (T.pack ("sin(x) & y = " ++ lineLabel ++ "  [+/- to shift]"))
+        [ withColor ColorBrightYellow $ text ("sin(x) & y = " ++ lineLabel ++ "  [+/- to shift]")
         , plotLine 35 12
             [ Series sinPoints  "sin(x)" ColorBrightCyan
             , Series linePoints "linear" ColorBrightYellow
@@ -500,7 +499,7 @@ sceneBarChartsSparklines s =
         , withColor ColorBrightCyan $ plotSparkline sparkData
         ]
     , layout
-        [ withColor ColorBrightYellow $ text (T.pack (modeName ++ "  [Tab to cycle]"))
+        [ withColor ColorBrightYellow $ text (modeName ++ "  [Tab to cycle]")
         , chartElem
         ]
     ]
@@ -523,7 +522,7 @@ sceneSelectionsHeatmap s =
               | isCur          = withStyle StyleBold . withColor ColorBrightCyan
               | isSel          = withColor ColorBrightGreen
               | otherwise      = id
-        in applyStyle $ text (T.pack label)
+        in applyStyle $ text label
         ) [0 :: Int ..] days
 
       selCount = length (selected s)
@@ -545,10 +544,10 @@ sceneSelectionsHeatmap s =
         [ layout selectorLines
         , br
         , withColor (if selCount > 0 then ColorBrightGreen else ColorBrightBlack) $
-            text (T.pack (show selCount ++ " of " ++ show (length days) ++ " active"))
+            text (show selCount ++ " of " ++ show (length days) ++ " active")
         ]
     , withBorder BorderRound $ box "Weekly Activity"
-        [ plotHeatmap' 5 (HeatmapData heatData (map T.pack days) hours) ]
+        [ plotHeatmap' 5 (HeatmapData heatData days hours) ]
     ]
 
 -- Ray marcher helpers (Scene 1)

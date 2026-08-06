@@ -10,7 +10,6 @@ Run with: cabal run inline-loading-demo
 module Main where
 
 import Layoutz
-import qualified Data.Text as T
 
 data S = S { prog :: Double, done :: Int }
 data M = Tick
@@ -35,7 +34,7 @@ progressBar label speed = LayoutzApp
           empty = replicate (w - filled) (withColor ColorBrightBlack $ text "░")
           pct = show (floor (prog st * 100) :: Int) ++ "%"
       in layout [ tightRow (bar ++ empty)
-                , withColor ColorBrightCyan $ text $ T.pack (label <> " " <> pct)
+                , withColor ColorBrightCyan $ text (label <> " " <> pct)
                 ]
   }
 

@@ -4,7 +4,6 @@ import Test.Tasty
 import Test.Tasty.HUnit
 import Layoutz
 import Data.List (isInfixOf)
-import qualified Data.Text as T
 import Data.IORef (newIORef, readIORef, writeIORef)
 
 -- Helper to strip ANSI codes for testing
@@ -19,7 +18,7 @@ stripAnsiTest (c:rest) = c : stripAnsiTest rest
 
 -- render to String for the String-based assertions below
 renderS :: Element a => a -> String
-renderS = T.unpack . render
+renderS = render
 
 main :: IO ()
 main = defaultMain tests

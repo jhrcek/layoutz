@@ -9,7 +9,6 @@ Run with: cabal run inline-bar
 module Main where
 
 import Layoutz
-import qualified Data.Text as T
 
 data LoadState = LoadState
   { progress :: Double
@@ -45,7 +44,7 @@ view state =
       pct = show (floor (progress state * 100) :: Int) ++ "%"
   in layout
        [ tightRow (barBlocks ++ emptyBlocks)
-       , withColor ColorBrightCyan $ text $ "Linking... " <> T.pack pct
+       , withColor ColorBrightCyan $ text $ "Linking... " <> pct
        ]
 
 app :: LayoutzApp LoadState Msg
