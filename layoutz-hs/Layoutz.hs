@@ -1439,8 +1439,8 @@ instance Element BarChartData where
                         barStr = replicateChar barW (T.index blockChars filled)
                     in if filled > 0 then wrapAnsi color' barStr else barStr
                   ) (zip [0..] (zip barHts items))
-            in padLeft yLabelW (yLabels !! rowIdx) <> " │" <> barCells
-          | rowIdx <- [0..h-1]
+            in padLeft yLabelW yLab <> " │" <> barCells
+          | (rowIdx, yLab) <- zip [0..] yLabels
           ]
 
         xAxisW    = nBars * barW + nBars - 1
@@ -1519,8 +1519,8 @@ instance Element StackedBarChartData where
                             barStr = replicateChar barW (T.index blockChars filled)
                         in if filled > 0 then wrapAnsi color' barStr else barStr
                   ) groupBounds
-            in padLeft yLabelW (yLabels !! rowIdx) <> " │" <> barCells
-          | rowIdx <- [0..h-1]
+            in padLeft yLabelW yLab <> " │" <> barCells
+          | (rowIdx, yLab) <- zip [0..] yLabels
           ]
 
         xAxisW    = nGroups * barW + nGroups - 1
