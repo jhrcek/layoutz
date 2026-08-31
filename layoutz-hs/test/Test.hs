@@ -465,6 +465,20 @@ visualizationTests = testGroup "Visualizations"
               [ StackedBarGroup [BarItem 10 "Only" ColorDefault] "Q1"
               , StackedBarGroup [BarItem 20 "Only" ColorDefault] "Q2" ]
         in not ("█ Only" `isInfixOf` r) @?= True
+
+    , testCase "plotStackedBar legend uses explicit segment colors" $
+        let r = renderS $ plotStackedBar 30 5
+              [ StackedBarGroup [ BarItem 10 "Red" ColorRed
+                                , BarItem 5 "Blue" ColorBlue ] "Q1" ]
+        in (   "\ESC[31m█\ESC[0m Red" `isInfixOf` r
+            && "\ESC[34m█\ESC[0m Blue" `isInfixOf` r) @?= True
+
+    , testCase "plotStackedBar legend falls back to palette color" $
+        let r = renderS $ plotStackedBar 30 5
+              [ StackedBarGroup [ BarItem 10 "A" ColorDefault
+                                , BarItem 5 "B" ColorDefault ] "Q1" ]
+        in (   "\ESC[96m█\ESC[0m A" `isInfixOf` r
+            && "\ESC[95m█\ESC[0m B" `isInfixOf` r) @?= True
     ]
 
   , testGroup "Heatmap"

@@ -1479,9 +1479,20 @@ instance Element StackedBarChartData where
           ) groups
 
         allLabels = nub [ nm | StackedBarGroup segs _ <- groups, BarItem _ nm _ <- segs ]
-        labelIdx nm = case lookup nm (zip allLabels [0..]) of
-          Just i  -> i
-          Nothing -> 0
+
+        -- One resolved color per label, shared by the bars and the legend:
+        -- the first explicit color given for that label, else a palette color
+        -- picked by the label's index.
+        labelColors =
+          [ (nm, pickColor i (firstExplicit nm)) | (i, nm) <- zip [0..] allLabels ]
+        firstExplicit nm = case [ cl | StackedBarGroup segs _ <- groups
+                                     , BarItem _ nm' cl <- segs
+                                     , nm' == nm, cl /= ColorDefault ] of
+          (cl:_) -> cl
+          []     -> ColorDefault
+        labelColor nm = case lookup nm labelColors of
+          Just c  -> c
+          Nothing -> ColorDefault
 
         yTicks  = [ maxTotal * fromIntegral (h - 1 - i) / fromIntegral (max 1 (h - 1)) | i <- [0..h-1] ]
         yLabels = map formatAxisNum yTicks
@@ -1502,11 +1513,9 @@ instance Element StackedBarChartData where
                                   if t2 > t1 then b else a) overlapping
                     in case topSeg of
                       Nothing -> T.replicate barW " "
-                      Just (BarItem _ nm cl, _, top) ->
+                      Just (BarItem _ nm _, _, top) ->
                         let filled = min 8 $ max 0 (top - subBot)
-                            color' = case cl of
-                              ColorDefault -> pickColor (labelIdx nm) ColorDefault
-                              _            -> cl
+                            color' = labelColor nm
                             barStr = replicateChar barW (T.index blockChars filled)
                         in if filled > 0 then wrapAnsi color' barStr else barStr
                   ) groupBounds
@@ -1520,11 +1529,7 @@ instance Element StackedBarChartData where
                     T.intercalate " " [ T.take barW (T.pack nm <> T.replicate barW " ")
                                       | StackedBarGroup _ nm <- groups ]
 
-        legendItems = map (\nm ->
-          let i = labelIdx nm
-              c = defaultPalette !! (i `mod` length defaultPalette)
-          in wrapAnsi c "█" <> " " <> T.pack nm
-          ) allLabels
+        legendItems = map (\nm -> wrapAnsi (labelColor nm) "█" <> " " <> T.pack nm) allLabels
         legendLine
           | length allLabels <= 1 = []
           | otherwise             = ["", T.intercalate "  " legendItems]
